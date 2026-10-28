@@ -1,8 +1,11 @@
 // Every call to the recruitment backend goes through this file.
 // In development "/api" is forwarded to the backend by vite.config.ts.
 // When deployed, set VITE_API_URL (full address) or VITE_API_HOST (just the host, e.g. my-api.onrender.com).
+// A bare Render service name (no dot, as render.yaml's fromService passes it) gets .onrender.com.
+const apiHost: string | undefined = import.meta.env.VITE_API_HOST;
 const BASE =
-  import.meta.env.VITE_API_URL ?? (import.meta.env.VITE_API_HOST ? `https://${import.meta.env.VITE_API_HOST}/api` : "/api");
+  import.meta.env.VITE_API_URL ??
+  (apiHost ? `https://${apiHost.includes(".") ? apiHost : `${apiHost}.onrender.com`}/api` : "/api");
 const TOKEN_KEY = "recruitment-token";
 
 export const STUDENT_EMAIL_DOMAIN = "vitstudent.ac.in";
