@@ -26,6 +26,12 @@ export function assertEditable(config: RecruitmentConfig, app: Application) {
   if (s.submitted) throw new HttpError(409, "Form already submitted", "ALREADY_SUBMITTED");
 }
 
+// New sign ups stop when recruitment is closed or the form deadline has passed
+export function assertSignupOpen(config: RecruitmentConfig) {
+  if (!config.isOpen) throw new HttpError(403, "Applications are closed", "FORM_CLOSED");
+  if (new Date() > config.formDeadline) throw new HttpError(403, "The deadline has passed", "DEADLINE_PASSED");
+}
+
 // The candidate's application for one domain
 export async function getApplication(userId: string, domain: DomainType) {
   const app = await prisma.application.findUnique({

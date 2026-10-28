@@ -7,7 +7,7 @@ import { prisma } from "../prisma";
 import { HttpError } from "../errors";
 import { asyncHandler } from "../middleware/error";
 import { profileSchema } from "../utils/validators";
-import { getConfig } from "../utils/recruitment";
+import { assertSignupOpen, getConfig } from "../utils/recruitment";
 import { createOtp, verifyOtp } from "../utils/otp";
 import { sendMail } from "../utils/mailer";
 
@@ -59,8 +59,9 @@ router.post(
     }
     const user = await prisma.user.findUnique({ where: { email: addr } });
 
-    if (purpose === "signup" && user) {
-      throw new HttpError(409, "This email is already registered. Please log in.", "ALREADY_REGISTERED");
+    if (purpose === "signup") {
+      if (user) throw new HttpError(409, "This email is already registered. Please log in.", "ALREADY_REGISTERED");
+      assertSignupOpen(await getConfig());
     }
     if (purpose === "login" && !user) {
       throw new HttpError(404, "No account with this email. Please sign up.", "NOT_REGISTERED");
@@ -88,8 +89,7 @@ router.post(
     }
     verifyOtp(otpToken, otp, addr, "signup");
 
-    const cfg = await getConfig();
-    if (!cfg.isOpen) throw new HttpError(403, "Applications are closed", "FORM_CLOSED");
+    assertSignupOpen(await getConfig());
 
     // a duplicate email or registration number returns 409 DUPLICATE
     const user = await prisma.$transaction(async (tx) => {

@@ -5,7 +5,7 @@ import { HttpError } from "../errors";
 import { asyncHandler } from "../middleware/error";
 import { requireAuth, requireUser } from "../middleware/auth";
 import { profileSchema, profileUpdateSchema } from "../utils/validators";
-import { getConfig } from "../utils/recruitment";
+import { assertSignupOpen, getConfig } from "../utils/recruitment";
 import { DOMAIN_LABELS } from "../utils/domains";
 
 const router = Router();
@@ -29,8 +29,7 @@ router.post(
     if (await prisma.user.findUnique({ where: { email } })) {
       throw new HttpError(409, "You are already registered", "ALREADY_REGISTERED");
     }
-    const config = await getConfig();
-    if (!config.isOpen) throw new HttpError(403, "Applications are closed", "FORM_CLOSED");
+    assertSignupOpen(await getConfig());
 
     const user = await prisma.$transaction(async (tx) => {
       const created = await tx.user.create({ data: { ...profile, email, image: picture } });
