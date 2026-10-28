@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { config } from "../config";
 import { HttpError } from "../errors";
 
-export type OtpPurpose = "signup" | "login";
+export type OtpPurpose = "signup" | "reset";
 const OTP_TTL_SECONDS = 10 * 60;
 
 function mac(email: string, purpose: string, code: string, extra: string) {

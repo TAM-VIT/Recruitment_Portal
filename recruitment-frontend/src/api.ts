@@ -157,20 +157,24 @@ export const api = {
   config: () => request<RecruitmentInfo>("/config"),
   domains: () => request<{ domains: DomainInfo[] }>("/domains"),
 
-  requestOtp: (email: string, purpose: "signup" | "login") =>
+  // a 6-digit code proves the email for sign up and password reset
+  requestOtp: (email: string, purpose: "signup" | "reset") =>
     // testCode only comes back from a test deployment with SHOW_OTP_CODES on
     request<{ sent: boolean; otpToken: string; testCode?: string }>("/auth/request-otp", post({ email, purpose })),
   signup: (body: {
     email: string;
     otpToken: string;
     otp: string;
+    password: string;
     name: string;
     phone: string;
     regNumber: string;
     domains: Domain[];
   }) => request<{ token: string; user: User }>("/auth/signup", post(body)),
-  login: (email: string, otpToken: string, otp: string) =>
-    request<{ token: string; user: User }>("/auth/login", post({ email, otpToken, otp })),
+  login: (email: string, password: string) =>
+    request<{ token: string; user: User }>("/auth/login", post({ email, password })),
+  resetPassword: (email: string, otpToken: string, otp: string, password: string) =>
+    request<{ reset: boolean }>("/auth/reset-password", post({ email, otpToken, otp, password })),
 
   me: () => request<{ registered: boolean; user?: User; applications?: AppSummary[] }>("/me"),
   updateMe: (body: Partial<{ name: string; phone: string; regNumber: string; domains: Domain[] }>) =>

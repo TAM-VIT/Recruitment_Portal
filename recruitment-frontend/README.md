@@ -1,8 +1,11 @@
 # Recruitment frontend (test app)
 
 A simple website for testing the recruitment backend. It covers everything a student does:
-OTP login, sign up, the application form, the status page, booking an interview slot, and the profile.
-It works on phones, tablets and laptops.
+sign up (email code + password), log in, forgot password, the application form, the status page,
+booking an interview slot, and the profile. It works on phones, tablets and laptops.
+
+**Easiest way:** use the deployed test site, https://recruitment-test-frontend.onrender.com. Nothing to install;
+in test mode the 6-digit code is shown on screen. The steps below are only for running it on your own laptop.
 
 This is **not** the real student site (that's the Next.js app in the repo root). It talks to the
 same backend, so it's the quickest way to check the backend works.
@@ -26,7 +29,7 @@ Copy `backend/.env.example` to `backend/.env` and fill it in. For testing:
 - **`DATABASE_URL`**: use the **test database**. Take the normal connection string and change the
   database name from `/recruitment?` to `/recruitment_test?`. That way testing never touches real data.
 - **`ENABLE_TEST_TOOLS="true"`**: turns on the test tools (see below). Never set this on the live server.
-- **`EMAIL_USER` / `EMAIL_APP_PASSWORD`**: optional. Without them, login codes are printed in the
+- **`EMAIL_USER` / `EMAIL_APP_PASSWORD`**: optional. Without them, sign-up and reset codes are printed in the
   backend terminal instead of emailed.
 
 Then create the collections and sample data (questions, interview slots, a deadline 7 days away):
@@ -43,7 +46,7 @@ cd backend
 npm run dev
 ```
 
-It runs on http://localhost:5000. Leave this terminal open: login codes appear here when email isn't set up.
+It runs on http://localhost:5000. Leave this terminal open: sign-up and reset codes appear here when email isn't set up.
 
 ## 3. Start the test app
 
@@ -64,7 +67,7 @@ the firewall: allow it on private networks.
 ## How to test
 
 1. **Sign up:** open the Sign up tab, enter an `@vitstudent.ac.in` email, press Send code, and enter the 6-digit
-   code (from your inbox, or from the backend terminal). Fill in your details and pick some domains.
+   code (from your inbox, or from the backend terminal). Fill in your details, pick some domains, and set a password.
    Any other email (e.g. `@gmail.com` or `@vit.ac.in`) is refused.
 2. **Form:** answer the questions, press Save under each one, then Submit. Submitting with blank required
    answers lists the missing questions. After submitting, that domain's answers are locked.
@@ -74,14 +77,19 @@ the firewall: allow it on private networks.
    Try Cancel too (allowed up to 12 hours before the slot).
 5. **Results:** use Test tools to set "Selected" or "Rejected" and see how the Status page shows it.
 6. **Profile:** change your details, or add and remove domains. A submitted domain can't be removed.
-7. **Log out and log in again** with the Log in tab.
+7. **Log out and log in again** with your email and password.
+8. **Forgot password:** on the Log in tab press "Forgot password?", get a code, and set a new password.
+   The old password stops working, and so does that code.
 
 Every rule the backend enforces shows up as a readable message (wrong code, deadline passed, slot full, and so on).
 
 ## Notes
 
-- Login is by email code (OTP) only, and only `@vitstudent.ac.in` emails are accepted. The backend enforces both.
-- A code works for 10 minutes. Each email can request 3 codes and make 6 attempts per 10 minutes.
+- Sign up and password reset check the email with a 6-digit code. Log in is email + password. Only
+  `@vitstudent.ac.in` emails are accepted. The backend enforces all of this.
+- Passwords need at least 8 characters. A code works for 10 minutes. Each email can request 3 codes and make
+  6 code attempts per 10 minutes, and 10 login attempts per 15 minutes.
+- Accounts made before passwords existed have no password: use "Forgot password?" to set one.
 - All times are shown in India time.
 - To start over, run `npm run db:reset -- --yes` then `npm run db:push` and `npm run db:seed` in `backend`.
   **Only do this with the test database** (`/recruitment_test`): it deletes everything in whatever database

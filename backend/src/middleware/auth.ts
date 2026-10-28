@@ -16,7 +16,7 @@ declare global {
   namespace Express {
     interface Request {
       auth?: AuthPayload;
-      user?: User;
+      user?: Omit<User, "passwordHash">; // the hash is never loaded (see prisma.ts)
     }
   }
 }

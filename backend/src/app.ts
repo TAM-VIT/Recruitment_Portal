@@ -8,7 +8,7 @@ import meRouter from "./routes/me";
 import formRouter from "./routes/form";
 import statusRouter from "./routes/status";
 import slotsRouter from "./routes/slots";
-import otpAuthRouter from "./routes/otpAuth";
+import authRouter from "./routes/auth";
 import testToolsRouter from "./routes/testTools";
 
 export const app = express();
@@ -22,7 +22,7 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
-app.use("/api/auth", otpAuthRouter);
+app.use("/api/auth", authRouter);
 app.use("/api", publicRouter);
 app.use("/api", meRouter);
 app.use("/api/form", formRouter);
