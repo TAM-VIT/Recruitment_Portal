@@ -28,7 +28,6 @@ export const profileUpdateSchema = profileSchema
   .partial()
   .refine((v) => Object.keys(v).length > 0, "Nothing to update");
 
-export const googleLoginSchema = z.object({ idToken: z.string().min(10) });
 
 export const saveAnswerSchema = z.object({
   questionId: objectId,

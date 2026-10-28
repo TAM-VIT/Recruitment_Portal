@@ -2,7 +2,7 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
-import { config } from "../config";
+import { config, isStudentEmail } from "../config";
 import { prisma } from "../prisma";
 import { HttpError } from "../errors";
 import { asyncHandler } from "../middleware/error";
@@ -12,11 +12,6 @@ import { createOtp, verifyOtp } from "../utils/otp";
 import { sendMail } from "../utils/mailer";
 
 const router = Router();
-
-function isAllowedEmail(email: string) {
-  const domain = email.split("@")[1];
-  return !!domain && config.allowedEmailDomains.includes(domain);
-}
 
 const signToken = (u: { email: string; name: string; image: string | null }) =>
   jwt.sign({ email: u.email, name: u.name, picture: u.image ?? null }, config.jwtSecret, { expiresIn: "7d" });
@@ -54,8 +49,8 @@ router.post(
   otpRequestLimit,
   asyncHandler(async (req, res) => {
     const { email: addr, purpose } = requestOtpSchema.parse(req.body);
-    if (!isAllowedEmail(addr)) {
-      throw new HttpError(403, "Please use your VIT email ID", "EMAIL_NOT_ALLOWED");
+    if (!isStudentEmail(addr)) {
+      throw new HttpError(403, "Please use your @vitstudent.ac.in email", "EMAIL_NOT_ALLOWED");
     }
     const user = await prisma.user.findUnique({ where: { email: addr } });
 
@@ -84,8 +79,8 @@ router.post(
   otpVerifyLimit,
   asyncHandler(async (req, res) => {
     const { email: addr, otpToken, otp, domains, ...profile } = signupSchema.parse(req.body);
-    if (!isAllowedEmail(addr)) {
-      throw new HttpError(403, "Please use your VIT email ID", "EMAIL_NOT_ALLOWED");
+    if (!isStudentEmail(addr)) {
+      throw new HttpError(403, "Please use your @vitstudent.ac.in email", "EMAIL_NOT_ALLOWED");
     }
     verifyOtp(otpToken, otp, addr, "signup");
 

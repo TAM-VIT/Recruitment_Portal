@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { config as appConfig } from "../config";
 import { prisma } from "../prisma";
 import { asyncHandler } from "../middleware/error";
 import { getConfig } from "../utils/recruitment";
@@ -31,6 +32,7 @@ router.get(
       formDeadline: config.formDeadline,
       serverTime: new Date(now).toISOString(),
       msRemaining: Math.max(0, config.formDeadline.getTime() - now),
+      testTools: appConfig.testTools, // lets a test frontend show its test-only buttons
     });
   })
 );

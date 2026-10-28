@@ -4,8 +4,8 @@ import { prisma } from "../prisma";
 import { HttpError } from "../errors";
 import { asyncHandler } from "../middleware/error";
 import { requireAuth, requireUser } from "../middleware/auth";
-import { profileSchema, profileUpdateSchema } from "../utils/validators";
-import { assertSignupOpen, getConfig } from "../utils/recruitment";
+import { profileUpdateSchema } from "../utils/validators";
+import { getConfig } from "../utils/recruitment";
 import { DOMAIN_LABELS } from "../utils/domains";
 
 const router = Router();
@@ -17,41 +17,14 @@ const summary = (a: Application) => ({
   submitted: !!a.submittedAt,
 });
 
-// POST /api/signup   body: { name, phone, regNumber, domains[] }
-// Email comes from the Google login token. Creates one application per chosen domain.
-router.post(
-  "/signup",
-  requireAuth,
-  asyncHandler(async (req, res) => {
-    const { email, picture } = req.auth!;
-    const { domains, ...profile } = profileSchema.parse(req.body);
-
-    if (await prisma.user.findUnique({ where: { email } })) {
-      throw new HttpError(409, "You are already registered", "ALREADY_REGISTERED");
-    }
-    assertSignupOpen(await getConfig());
-
-    const user = await prisma.$transaction(async (tx) => {
-      const created = await tx.user.create({ data: { ...profile, email, image: picture } });
-      await tx.application.createMany({
-        data: domains.map((domain) => ({ userId: created.id, domain })),
-      });
-      return created;
-    });
-
-    const applications = await prisma.application.findMany({ where: { userId: user.id } });
-    res.status(201).json({ user, applications: applications.map(summary) });
-  })
-);
-
-// GET /api/me -> profile page. Returns registered:false if sign up isn't finished.
+// GET /api/me -> profile page. Returns registered:false if the account no longer exists.
 router.get(
   "/me",
   requireAuth,
   asyncHandler(async (req, res) => {
     const user = await prisma.user.findUnique({ where: { email: req.auth!.email } });
     if (!user) {
-      res.json({ registered: false, google: req.auth });
+      res.json({ registered: false });
       return;
     }
     const applications = await prisma.application.findMany({

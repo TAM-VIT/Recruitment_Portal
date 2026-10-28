@@ -124,9 +124,10 @@ router.post(
       throw new HttpError(422, "Some required questions are unanswered", "INCOMPLETE_FORM", { missing });
     }
 
-    // protects against double submits
+    // protects against double submits. On MongoDB a never-set field isn't matched by `null`,
+    // so new applications (no submittedAt field yet) need isSet: false
     const result = await prisma.application.updateMany({
-      where: { id: app.id, submittedAt: null },
+      where: { id: app.id, OR: [{ submittedAt: null }, { submittedAt: { isSet: false } }] },
       data: { submittedAt: new Date() },
     });
     if (result.count === 0) throw new HttpError(409, "Form already submitted", "ALREADY_SUBMITTED");

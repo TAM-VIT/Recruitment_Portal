@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import type { User } from "@prisma/client";
-import { config } from "../config";
+import { config, isStudentEmail } from "../config";
 import { prisma } from "../prisma";
 import { HttpError } from "../errors";
 import { asyncHandler } from "./error";
@@ -29,6 +29,9 @@ export const requireAuth: RequestHandler = (req, _res, next) => {
   }
   try {
     const p = jwt.verify(header.slice(7), config.jwtSecret) as AuthPayload;
+    if (!isStudentEmail(p.email)) {
+      return next(new HttpError(403, "Please use your @vitstudent.ac.in email", "EMAIL_NOT_ALLOWED"));
+    }
     req.auth = { email: p.email, name: p.name, picture: p.picture ?? null };
     next();
   } catch {
