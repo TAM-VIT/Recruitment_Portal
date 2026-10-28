@@ -17,6 +17,7 @@ export default function Login({
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [otpToken, setOtpToken] = useState<string | null>(null); // set once a code was sent
+  const [testCode, setTestCode] = useState<string | null>(null); // test deployments only
   const [otp, setOtp] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -64,6 +65,7 @@ export default function Login({
     try {
       const r = await api.requestOtp(email.trim().toLowerCase(), mode);
       setOtpToken(r.otpToken);
+      setTestCode(r.testCode ?? null);
       setOtp("");
       setWait(RESEND_AFTER);
     } catch (err) {
@@ -144,10 +146,16 @@ export default function Login({
             </form>
           ) : (
             <form onSubmit={verify} noValidate>
-              <Alert kind="ok">
-                We sent a 6-digit code to <b>{email.trim().toLowerCase()}</b>. It works for 10 minutes.
-                {import.meta.env.DEV && <><br /><span className="small">No email set up? The code is printed in the backend terminal.</span></>}
-              </Alert>
+              {testCode ? (
+                <Alert kind="warn">
+                  Test mode: emails aren't sent. Your code is <b>{testCode}</b>.
+                </Alert>
+              ) : (
+                <Alert kind="ok">
+                  We sent a 6-digit code to <b>{email.trim().toLowerCase()}</b>. It works for 10 minutes.
+                  {import.meta.env.DEV && <><br /><span className="small">No email set up? The code is printed in the backend terminal.</span></>}
+                </Alert>
+              )}
               <label className="field">
                 <span>Code</span>
                 <input

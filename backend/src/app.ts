@@ -12,6 +12,7 @@ import otpAuthRouter from "./routes/otpAuth";
 import testToolsRouter from "./routes/testTools";
 
 export const app = express();
+app.set("trust proxy", 1); // behind one proxy on hosts like Render, so req.ip is the student's address
 
 app.use(helmet());
 app.use(cors({ origin: config.corsOrigin }));

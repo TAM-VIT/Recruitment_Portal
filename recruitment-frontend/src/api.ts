@@ -1,6 +1,8 @@
 // Every call to the recruitment backend goes through this file.
 // In development "/api" is forwarded to the backend by vite.config.ts.
-const BASE = import.meta.env.VITE_API_URL ?? "/api";
+// When deployed, set VITE_API_URL (full address) or VITE_API_HOST (just the host, e.g. my-api.onrender.com).
+const BASE =
+  import.meta.env.VITE_API_URL ?? (import.meta.env.VITE_API_HOST ? `https://${import.meta.env.VITE_API_HOST}/api` : "/api");
 const TOKEN_KEY = "recruitment-token";
 
 export const STUDENT_EMAIL_DOMAIN = "vitstudent.ac.in";
@@ -153,7 +155,8 @@ export const api = {
   domains: () => request<{ domains: DomainInfo[] }>("/domains"),
 
   requestOtp: (email: string, purpose: "signup" | "login") =>
-    request<{ sent: boolean; otpToken: string }>("/auth/request-otp", post({ email, purpose })),
+    // testCode only comes back from a test deployment with SHOW_OTP_CODES on
+    request<{ sent: boolean; otpToken: string; testCode?: string }>("/auth/request-otp", post({ email, purpose })),
   signup: (body: {
     email: string;
     otpToken: string;

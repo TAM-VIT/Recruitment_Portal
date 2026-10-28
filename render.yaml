@@ -1,0 +1,43 @@
+# TEST deployment on Render (render.com): the student backend + the test frontend,
+# using the recruitment_test database with test tools on. Not the real launch.
+# Render → New → Blueprint → pick this repo and branch. It asks for DATABASE_URL.
+services:
+  - type: web
+    name: recruitment-test-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: development # test tools are switched off when this is production
+      - key: ENABLE_TEST_TOOLS
+        value: "true"
+      - key: SHOW_OTP_CODES
+        value: "true" # set to "false" once EMAIL_USER / EMAIL_APP_PASSWORD are added
+      - key: DATABASE_URL
+        sync: false # paste the link with /recruitment_test? as the database name
+      - key: JWT_SECRET
+        generateValue: true
+      - key: OTP_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        fromService:
+          type: web
+          name: recruitment-test-frontend
+          property: host
+
+  - type: web
+    name: recruitment-test-frontend
+    runtime: static
+    rootDir: recruitment-frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_HOST
+        fromService:
+          type: web
+          name: recruitment-test-backend
+          property: host

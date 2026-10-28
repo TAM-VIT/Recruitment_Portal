@@ -68,7 +68,8 @@ router.post(
       purpose === "signup" ? "Your verification code" : "Your login code",
       `Your code is ${otp}. It expires in 10 minutes.\n\nIf you didn't request it, ignore this email.`
     );
-    res.json({ sent: true, otpToken });
+    // test deployments without email can show the code on screen (needs test tools + SHOW_OTP_CODES=true)
+    res.json({ sent: true, otpToken, ...(config.showOtpCodes ? { testCode: otp } : {}) });
   })
 );
 
