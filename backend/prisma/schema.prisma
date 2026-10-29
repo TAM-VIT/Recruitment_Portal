@@ -61,6 +61,7 @@ model User {
   phone        String
   regNumber    String        @unique
   image        String?
+  passwordHash String?       // bcrypt hash, set at sign up
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   answers      Answer[]

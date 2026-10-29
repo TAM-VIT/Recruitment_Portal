@@ -39,6 +39,11 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     res.status(400).json({ error: "Invalid JSON body", code: "INVALID_JSON" });
     return;
   }
+  // body bigger than the express.json limit
+  if (typeof err === "object" && err && (err as { type?: string }).type === "entity.too.large") {
+    res.status(413).json({ error: "Request is too large", code: "TOO_LARGE" });
+    return;
+  }
   console.error(err);
   res.status(500).json({ error: "Internal server error" });
 }

@@ -92,7 +92,7 @@ p { margin: 0 0 8px; }
 .field { display: block; margin-bottom: 14px; }
 .field > span { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
 .field small { display: block; color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
-input[type="text"], input[type="email"], input[type="tel"], select, textarea {
+input[type="text"], input[type="email"], input[type="tel"], input[type="password"], select, textarea {
   width: 100%; min-height: var(--tap);
   padding: 10px 12px;
   border: 1px solid var(--line); border-radius: 10px; background: var(--card);
