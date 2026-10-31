@@ -46,12 +46,13 @@ enum EmailStatus {
 }
 
 model Admin {
-  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
   name         String?
-  email        String      @unique
-  role         Role        @default(DOMAIN_HEAD)
+  email        String     @unique
+  password     String?
+  role         Role       @default(DOMAIN_HEAD)
   domain       DomainType?
-  slotsCreated Slot[]      @relation("AdminSlots")
+  slotsCreated Slot[]     @relation("AdminSlots")
 }
 
 model User {
@@ -70,11 +71,11 @@ model User {
 
 // One row per candidate per domain
 model Application {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   domain      DomainType
-  stage       Stage        @default(FORM_FILLING)
+  stage       Stage    @default(FORM_FILLING)
   submittedAt DateTime?
-  createdAt   DateTime     @default(now())
+  createdAt   DateTime @default(now())
 
   review1Marks    Int?
   review1Comments String?
@@ -83,8 +84,8 @@ model Application {
   review2Comments String?
   review2Passed   Boolean @default(false)
 
-  userId  String       @db.ObjectId
-  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String   @db.ObjectId
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   booking SlotBooking?
   emails  EmailLog[]
 
@@ -108,6 +109,7 @@ model Question {
   subsectionId String?     @db.ObjectId
   subsection   Subsection? @relation(fields: [subsectionId], references: [id])
   text         String
+  maxMarks     Int         @default(10)
   order        Int         @default(0)
   required     Boolean     @default(true)
   maxLength    Int         @default(2000)
@@ -119,6 +121,7 @@ model Question {
 model Answer {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   text       String
+  marks      Int?
   userId     String   @db.ObjectId
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   questionId String   @db.ObjectId
